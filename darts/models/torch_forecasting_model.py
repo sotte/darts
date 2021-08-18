@@ -496,7 +496,7 @@ class TorchForecastingModel(GlobalForecastingModel, ABC):
                                   batch_size=self.batch_size,
                                   shuffle=True,
                                   num_workers=0,
-                                  pin_memory=True,
+                                  pin_memory=False,
                                   drop_last=False,
                                   collate_fn=self._batch_collate_fn)
 
@@ -505,7 +505,7 @@ class TorchForecastingModel(GlobalForecastingModel, ABC):
                                                                  batch_size=self.batch_size,
                                                                  shuffle=False,
                                                                  num_workers=0,
-                                                                 pin_memory=True,
+                                                                 pin_memory=False,
                                                                  drop_last=False,
                                                                  collate_fn=self._batch_collate_fn)
 
