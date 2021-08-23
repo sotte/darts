@@ -57,6 +57,7 @@ from ..utils.data.sequential_dataset import (PastCovariatesSequentialDataset,
 from ..utils.likelihood_models import LikelihoodModel
 from ..logging import raise_if_not, get_logger, raise_log, raise_if
 from .forecasting_model import GlobalForecastingModel
+from ..explainability import ShapExplainer
 
 DEFAULT_DARTS_FOLDER = '.darts'
 CHECKPOINTS_FOLDER = 'checkpoints'
@@ -616,6 +617,19 @@ class TorchForecastingModel(GlobalForecastingModel, ABC):
         predictions = self.predict_from_dataset(n, dataset, verbose=verbose, batch_size=batch_size, n_jobs=n_jobs,
                                                 roll_size=roll_size, num_samples=num_samples)
         return predictions[0] if called_with_single_series else predictions
+
+    def predict_explain(self, n: int) -> TimeSeries:
+
+        explainer = ShapExplainer(self, self.input_chunk_length)
+        predictions = self.predict(n)
+        series_input = self.training_series[-self.input_chunk_length:]
+
+        explained_list = []
+        for i in range(n):
+            explained_list.append(explainer.explain_with_timeseries(series_input[-self.input_chunk_length:]))
+            series_input = series_input.append(predictions[i])
+        
+        return(predictions, explained_list)
 
     def predict_from_dataset(self,
                              n: int,
