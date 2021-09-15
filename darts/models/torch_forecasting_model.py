@@ -618,19 +618,6 @@ class TorchForecastingModel(GlobalForecastingModel, ABC):
                                                 roll_size=roll_size, num_samples=num_samples)
         return predictions[0] if called_with_single_series else predictions
 
-    def predict_explain(self, n: int) -> TimeSeries:
-
-        explainer = ShapExplainer(self, self.input_chunk_length)
-        predictions = self.predict(n)
-        series_input = self.training_series[-self.input_chunk_length:]
-
-        explained_list = []
-        for i in range(n):
-            explained_list.append(explainer.explain_with_timeseries(series_input[-self.input_chunk_length:]))
-            series_input = series_input.append(predictions[i])
-        
-        return(predictions, explained_list)
-
     def predict_from_dataset(self,
                              n: int,
                              input_series_dataset: InferenceDataset,
@@ -758,6 +745,36 @@ class TorchForecastingModel(GlobalForecastingModel, ABC):
                 predictions.extend(ts_forecasts)
 
         return predictions
+    
+    def predict_explain(self,
+                        n: int, 
+                        series: Optional[TimeSeries] = None,
+                        **kwargs,
+                        ) -> Tuple[TimeSeries, Sequence[np.array]]:
+        """
+        Use prediction and explain the impact of each previous timestep of 
+        the input_chunk used to compute the prediction
+        
+        Parameters
+        ----------
+        
+        Return
+        ------
+        
+        """
+        if series is None:
+            raise_if(
+                self.training_series is None, 
+                "A single time series for explainability has to be provided after fitting on multiple series.")
+            series = self.training_series
+
+        explainer = ShapExplainer(self, n=n, past_steps_explained=self.input_chunk_length, background_series=series)
+        predictions = self.predict(n, series)
+        series_input = series[-self.input_chunk_length:]
+
+        explained = explainer.explain_input(foreground_series=series_input, display=True, **kwargs)
+        
+        return (predictions, explained)
 
     def _sample_tiling(self, input_data_tuple, batch_sample_size):
         tiled_input_data = []

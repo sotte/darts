@@ -1,5 +1,5 @@
 """
-Explainability Base Classes
+Explainability Base Class
 ------------------------------
 
 TODO
@@ -22,7 +22,10 @@ logger = get_logger(__name__)
 class ForecastingModelExplainer(ABC):
 
     @abstractmethod
-    def __init__(self, model: ForecastingModel, past_steps_explained: int):
+    def __init__(self, 
+                model: ForecastingModel, 
+                past_steps_explained: int
+                ):
 
         if not model._fit_called:
             raise_log(
@@ -30,19 +33,12 @@ class ForecastingModelExplainer(ABC):
                 logger
                 )
 
-        if not model.training_series.is_univariate:
-            raise_log(
-                ValueError('Explainability only works for univariate timeseries for now. Stay tuned.'),
-                logger
-                )
-        
-        # if isinstance(model, TorchForecastingModel):
-        #     # TODO We will have to generalize with output_chunk_length functions to be explained.
-        #     if model.output_chunk_length > 1:
-        #         raise_log(
-        #             ValueError('The model must have an output_chunk_length of 1.'),
-        #             logger
-        #         )
+        if not model.training_series == None:
+            if not model.training_series.is_univariate:
+                raise_log(
+                    ValueError('Explainability only works for univariate timeseries for now. Stay tuned.'),
+                    logger
+                    )
 
         if model._is_probabilistic():
             # TODO: We can probably add explainability to probabilistic models, by taking the mean output.
@@ -55,19 +51,19 @@ class ForecastingModelExplainer(ABC):
         self.past_steps_explained = past_steps_explained
 
     @abstractmethod
-    def explain_with_timestamp(self, timestamp: Union[pd.Timestamp, int]) -> object:
+    def explain_timestamp(self, timestamp: Union[pd.Timestamp, int]) -> object:
         """
-        For a given timestamp in the past, give the contributtion of the past_steps_explained previous 
-        timesteps of the timeseries
+        For a given timestamp in the past, give the contribution of the past_steps_explained previous 
+        elements of the timeseries
         
         """
         pass
 
     @abstractmethod
-    def explain_with_timeseries(self, series: TimeSeries) -> object:
+    def explain_input(self, series: TimeSeries) -> object:
         """
         For a given timeseries input, give the contribution of the past_steps_explained previous 
-        timesteps of the timeseries
+        elements of the timeseries
         
         """
         pass
