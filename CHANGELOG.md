@@ -3,8 +3,35 @@
 
 Darts is still in an early development phase and we cannot always guarantee backwards compatibility. Changes that may **break code which uses a previous release of Darts** are marked with a "&#x1F534;".
 
-## [Unreleased](https://github.com/unit8co/darts/tree/develop)
-[Full Changelog](https://github.com/unit8co/darts/compare/0.10.0...develop)
+## [Unreleased](https://github.com/unit8co/darts/tree/master)
+[Full Changelog](https://github.com/unit8co/darts/compare/0.11.0...master)
+
+## [0.11.0](https://github.com/unit8co/darts/tree/0.11.0) (2021-09-04)
+### For users of the library:
+
+**Added:**
+- New model: `LightGBMModel` is a new regression model. Regression models allow to predict future values
+of the target, given arbitrary lags of the target as well as past and/or future covariates. `RegressionModel`
+already works with any scikit-learn regression model, and now `LightGBMModel` does the same with LightGBM.
+If you want to activate LightGBM support in Darts, please read the detailed install notes on 
+the [README](https://github.com/unit8co/darts/blob/master/README.md) carefully.
+- Added stride support to gridsearch
+
+**Fixed:**
+- A bug which was causing issues when training on a GPU with a validation set
+- Some issues with custom-provided RNN modules in `RNNModel`.
+- Properly handle `kwargs` in the `fit` function of `RegressionModel`s.
+- Fixed an issue which was causing problems with latest versions of Matplotlib.
+- An issue causing errors in the FFT notebook
+
+## [0.10.1](https://github.com/unit8co/darts/tree/0.10.1) (2021-08-19)
+### For users of the library:
+
+**Fixed:**
+- A bug with memory pinning that was causing issues with training models on GPUs.
+
+**Changed:**
+- Clarified conda support on the README
 
 ## [0.10.0](https://github.com/unit8co/darts/tree/0.10.0) (2021-08-13)
 ### For users of the library:
@@ -15,7 +42,7 @@ argument, but it wasn't always clear whether this represented "past-observed" or
 We have made this clearer. Now all covariate-aware models support `past_covariates` and/or `future_covariates` argument 
 in their `fit()` and `predict()` methods, which makes it clear what series is used as a past or future covariate.
 We recommend [this article](https://medium.com/unit8-machine-learning-publication/time-series-forecasting-using-past-and-future-external-data-with-darts-1f0539585993)
-for more informations and examples.
+for more information and examples.
 
 - &#x1F534; Significant improvement of `RegressionModel` (incl. `LinearRegressionModel` and `RandomForest`).
 These models now support training on multiple (possibly multivariate) time series. They also support both
@@ -154,7 +181,7 @@ more closely.
 
 ### For developers of the library:
 **Added:**
-- We have added some [contribution guidelines](https://github.com/unit8co/darts/blob/develop/CONTRIBUTE.md).
+- We have added some [contribution guidelines](https://github.com/unit8co/darts/blob/master/CONTRIBUTE.md).
 
 ## [0.7.0](https://github.com/unit8co/darts/tree/0.7.0) (2021-04-14)
 
@@ -232,7 +259,7 @@ All implementations of `GlobalForecastingModel`s support multivariate time serie
 - Ensemble models, a new kind of `ForecastingModel` which allows to ensemble multiple models to make predictions:
   - `EnsembleModel` is the abstract base class for ensemble models. Classes deriving from `EnsembleModel` must implement the `ensemble()` method, which takes in a `List[TimeSeries]` of predictions from the constituent models, and returns the ensembled prediction (a single `TimeSeries` object)
   - `RegressionEnsembleModel`, a concrete implementation of `EnsembleModel `which allows to specify any regression model (providing `fit()` and `predict()` methods) to use to ensemble the constituent models' predictions.
-- A new method to `TorchForecastingModel`: `untrained_model()` returns the model as it was initally created, allowing to retrain the exact same model from scratch. Works both when specifying a `random_state` or not.
+- A new method to `TorchForecastingModel`: `untrained_model()` returns the model as it was initially created, allowing to retrain the exact same model from scratch. Works both when specifying a `random_state` or not.
 - New `ForecastingModel.backtest()` and `RegressionModel.backtest()` functions which by default compute a single error score from the historical forecasts the model would have produced.
   - A new `reduction` parameter allows to specify whether to compute the mean/median/… of errors or (when `reduction` is set to `None`) to return a list of historical errors.
   - The previous `backtest()` functionality still exists but has been renamed `historical_forecasts()`
@@ -264,7 +291,7 @@ All implementations of `GlobalForecastingModel`s support multivariate time serie
   - Implementing your own data transformers:
     - Data transformers which need to be fitted first should derive from the `FittableDataTransformer` base class and implement a `fit()` method. Fittable transformers also provide a `fit_transform()` method, which fits the transformer and then transforms the data with a single call.
     - Data transformers which perform an invertible transformation should derive from the `InvertibleDataTransformer` base class and implement a `inverse_transform()` method.
-    - Data transformers wich are neither fittable nor invertible should derive from the `BaseDataTransformer` base class
+    - Data transformers which are neither fittable nor invertible should derive from the `BaseDataTransformer` base class
     - All data transformers must implement a `transform()` method.
 - Concrete `DataTransformer` implementations:
   - `MissingValuesFiller` wraps around `fill_missing_value()` and allows to fill missing values using either a constant value or the `pd.interpolate()` method.
@@ -307,7 +334,7 @@ All implementations of `GlobalForecastingModel`s support multivariate time serie
 ### For developers of the library
 **Changed:**
 - GitHub release workflow is now triggered manually from the GitHub "Actions" tab in the repository, providing a `#major`, `#minor`, or `#patch` argument. [\#211](https://github.com/unit8co/darts/pull/211)
-- (A limited number of) notebook examples are now run as part of the GitHub develop workflow.
+- (A limited number of) notebook examples are now run as part of the GitHub PR workflow.
 
 ## [0.3.0](https://github.com/unit8co/darts/tree/0.3.0) (2020-10-05)
 
